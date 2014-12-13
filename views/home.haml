@@ -1,0 +1,26 @@
+!!!
+%html
+  %head
+    %title Hue Converter
+  %body
+    %h2 A simple converter between hex, RGB, and hue format.
+    %h3 Using hex
+    -if @hex
+      Your hex value in hue is:
+      =@hex
+    %form{action: "/", method: "POST"}
+      %label Hex Code
+      %input{type: "text", name: "hex"}
+      %input{type: "submit"}
+    %h3 Using RGB
+    -if @rgb
+      Your rgb in hue is:
+      =@rgb
+    %form{action: "/", method: "POST"}
+      %label r
+      %input{type: "text", name: "r"}
+      %label g
+      %input{type: "text", name: "g"}
+      %label b
+      %input{type: "text", name: "b"}
+      %input{type: "submit"}
