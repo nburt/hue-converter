@@ -2,21 +2,6 @@ require 'sinatra'
 require 'haml'
 require 'pry'
 
-class HSL
-  def initialize(h, s, l)
-    @hue = h.to_f
-    @saturation = s.to_f
-    @luminance = l.to_f
-  end
-
-  def to_hue
-    h = (@hue / 360) * 65535
-    s = @saturation * 255
-    l = @luminance * 255
-    {hue: h.to_i, saturation: s.to_i, luminance: l.to_i}
-  end
-end
-
 class RGB
 
   attr_reader :red, :green, :blue
@@ -82,16 +67,40 @@ class HexRGB < RGB
   end
 end
 
+def rgb_to_hsl(colors)
+  red, green, blue = colors[0] / 255.0, colors[1] / 255.0, colors[2] / 255.0
+
+  max = [red, green, blue].max
+  min = [red, green, blue].min
+  h, s, l = 0, 0, ((max + min) / 2 * 255)
+
+  d = max - min
+  s = max == 0 ? 0 : (d / max * 255)
+
+  h = case max
+      when min
+        0 # monochromatic
+      when red
+        (green - blue) / d + (green < blue ? 6 : 0)
+      when green
+        (blue - red) / d + 2
+      when blue
+        (red - green) / d + 4
+      end * 60  # / 6 * 360
+
+  h = (h * (65536.0 / 360)).to_i
+  [h, s.to_i, 1.0]
+end
 
 home = lambda do
   if params[:hex]
     hexrgb = HexRGB.new(params[:hex])
-    hsl = RGB.new(hexrgb.red, hexrgb.green, hexrgb.blue).to_hsl.to_hue
-    @hex = {hue: hsl[:hue], saturation: hsl[:saturation], luminance: hsl[:luminance]}.to_s
+    colors = rgb_to_hsl([hexrgb.red.to_i, hexrgb.green.to_i, hexrgb.blue.to_i])
+    @hex = {hue: colors[0], saturation: colors[1], bri: 1}.to_s
   end
   if params[:r]
-    hsl = RGB.new(params[:r], params[:g], params[:b]).to_hsl.to_hue
-    @rgb = {hue: hsl[:hue], saturation: hsl[:saturation], luminance: hsl[:luminance]}.to_s
+    colors = rgb_to_hsl([params[:r].to_i, params[:g].to_i, params[:b].to_i])
+    @hex = {hue: colors[0], saturation: colors[1], bri: 1}.to_s
   end
   haml :home
 end
