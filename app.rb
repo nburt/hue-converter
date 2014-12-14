@@ -100,7 +100,7 @@ home = lambda do
   end
   if params[:r]
     colors = rgb_to_hsl([params[:r].to_i, params[:g].to_i, params[:b].to_i])
-    @hex = {hue: colors[0], saturation: colors[1], bri: 1}.to_s
+    @rgb = {hue: colors[0], saturation: colors[1], bri: 1}.to_s
   end
   haml :home
 end
